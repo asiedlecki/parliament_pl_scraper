@@ -19,5 +19,23 @@ class TestMainVotingPage(unittest.TestCase):
         self.assertIsNotNone(table_of_voting_days, "There is no table on main page")
         self.assertTrue(len(table_of_voting_days) > 0, "There is no data in the table")
 
+
+class TestDayVotingPage(unittest.TestCase):
+    bs_day_voting_page = None
+    def setUpClass():
+        url = 'http://www.sejm.gov.pl/Sejm9.nsf/agent.xsp?symbol=listaglos&IdDnia=1802'
+        TestDayVotingPage.bs_day_voting_page = BeautifulSoup(urlopen(url), 'html.parser')
+
+    def test_title_ext(self):
+        pageTitle = TestDayVotingPage.bs_day_voting_page.find('h1').get_text()
+        self.assertEqual('Głosowania w dniu', pageTitle[:17]);
+
+    def test_list_of_voting_days(self):
+        table_of_voting_days = (TestDayVotingPage.bs_day_voting_page
+                                .find('div', {'id': 'view:_id1:_id2:facetMain:agentHTML'})
+                                .tbody.find_all('tr'))
+        self.assertIsNotNone(table_of_voting_days, "There is no table on main page")
+        self.assertTrue(len(table_of_voting_days) > 0, "There is no data in the table")
+
 if __name__ == '__main__':
     unittest.main(warnings='ignore')
