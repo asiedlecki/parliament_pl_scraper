@@ -56,14 +56,14 @@ class TestVotingPage(unittest.TestCase):
         self.assertTrue(len(clubs_list) > 0, "There is no link to club votes")
 
 
-class TestClubPage(unittest.TestCase):
+class TestClubVotesPage(unittest.TestCase):
     bs_club_page = None
     def setUpClass():
         url = 'http://www.sejm.gov.pl/Sejm9.nsf/agent.xsp?symbol=klubglos&IdGlosowania=53923&KodKlubu=Konfederacja'
-        TestClubPage.bs_club_page = BeautifulSoup(urlopen(url), 'html.parser')
+        TestClubVotesPage.bs_club_page = BeautifulSoup(urlopen(url), 'html.parser')
 
     def test_title_text(self):
-        pageTitle = (TestClubPage.bs_club_page
+        pageTitle = (TestClubVotesPage.bs_club_page
                      .find('div', {'id': 'view:_id1:_id2:facetMain:agentHTML'})
                      .find('h1').get_text())
         self.assertEqual('Wyniki imienne posłów', pageTitle[:21]);
@@ -72,7 +72,7 @@ class TestClubPage(unittest.TestCase):
         cols_with_name = [1, 4]
 
         person_vote = {}
-        for td in [tr.findAll('td') for tr in TestClubPage.bs_club_page.find('tbody').findAll('tr')]:
+        for td in [tr.findAll('td') for tr in TestClubVotesPage.bs_club_page.find('tbody').findAll('tr')]:
             for col in cols_with_name:
                 try:
                     person_vote[td[col].string] = td[col + 1].string

@@ -73,3 +73,23 @@ class SingleVotingPage(ParliamentPage):
         self.voting_nr = voting_nr
         self.clubs_list = [(a.get_text(), a.attrs['href']) for a in self.soup.find_all('a')
                            if re.search(club_link_regex, a.attrs['href'])]
+
+
+class SingleClubVotesPage(ParliamentPage):
+
+    def __init__(self, club, *args, **kwargs):
+        super(SingleClubVotesPage, self).__init__(*args, **kwargs)
+        club_link_regex = '^agent.xsp\?symbol=klubglos'
+        self.club = club
+        self.person_vote = self.get_vote_per_person()
+
+    def get_vote_per_person(self):
+        cols_with_name = [1, 4]
+        persons_dict = {}
+        for td in [tr.findAll('td') for tr in self.soup.find('tbody').findAll('tr')]:
+            for col in cols_with_name:
+                try:
+                    persons_dict[td[col].string] = td[col + 1].string
+                except IndexError:
+                    pass
+        return persons_dict
