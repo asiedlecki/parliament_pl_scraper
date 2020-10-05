@@ -1,6 +1,7 @@
 import unittest
 from urllib.request import urlopen, http
 from bs4 import BeautifulSoup
+import re
 
 class TestMainVotingPage(unittest.TestCase):
     bs_main_voting_page = None
@@ -36,6 +37,23 @@ class TestDayVotingPage(unittest.TestCase):
                                 .tbody.find_all('tr'))
         self.assertIsNotNone(table_of_voting_days, "There is no table on main page")
         self.assertTrue(len(table_of_voting_days) > 0, "There is no data in the table")
+
+
+class TestVotingPage(unittest.TestCase):
+    bs_voting_page = None
+    def setUpClass():
+        url = 'http://www.sejm.gov.pl/Sejm9.nsf/agent.xsp?symbol=glosowania&NrKadencji=9&NrPosiedzenia=17&NrGlosowania=1'
+        TestVotingPage.bs_voting_page = BeautifulSoup(urlopen(url), 'html.parser')
+
+    def test_title_ext(self):
+        pageTitle = TestVotingPage.bs_voting_page.find('h1').get_text()
+        self.assertEqual('Głosowanie nr', pageTitle[:13]);
+
+    def test_links_to_clubs_exist(self):
+        club_link_regex = '^agent.xsp\?symbol=klubglos'
+        clubs_list = [(a.get_text(), a.attrs['href']) for a in TestVotingPage.bs_voting_page.find_all('a')
+                      if re.search(club_link_regex, a.attrs['href'])]
+        self.assertTrue(len(clubs_list) > 0, "There is no link to club votes")
 
 if __name__ == '__main__':
     unittest.main(warnings='ignore')
