@@ -43,3 +43,33 @@ class MainVotingPage(ParliamentPage):
             votings = row.find('td', {'class': 'right'}).get_text()
             link = row.a.attrs['href']
             self.days_dict[date] = {'session': session, 'votings': votings, 'link': link}
+
+
+class DayVotingPage(ParliamentPage):
+
+    def __init__(self, date, *args, **kwargs):
+        super(DayVotingPage, self).__init__(*args, **kwargs)
+        self.date = date
+        self.votes = {}
+
+    def get_dict_of_votes(self):
+        table_rows = (self.soup.find('div', {'id': 'view:_id1:_id2:facetMain:agentHTML'})
+                      .tbody.find_all('tr'))
+
+        for row in table_rows:
+            time = row.td.next_sibling.get_text()
+            subject = row.td.next_sibling.next_sibling.a.get_text()
+            voting_nr = row.a.get_text()
+            link = row.a.attrs['href']
+            self.votes[time] = {'voting_nr': voting_nr, 'subject': subject, 'link': link}
+
+
+class SingleVotingPage(ParliamentPage):
+
+    def __init__(self, subject, voting_nr, *args, **kwargs):
+        super(SingleVotingPage, self).__init__(*args, **kwargs)
+        club_link_regex = '^agent.xsp\?symbol=klubglos'
+        self.subject = subject
+        self.voting_nr = voting_nr
+        self.clubs_list = [(a.get_text(), a.attrs['href']) for a in self.soup.find_all('a')
+                           if re.search(club_link_regex, a.attrs['href'])]
