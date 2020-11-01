@@ -54,13 +54,15 @@ class DayVotingPage(ParliamentPage):
     def get_dict_of_votes(self):
         table_rows = (self.soup.find('div', {'id': 'view:_id1:_id2:facetMain:agentHTML'})
                       .tbody.find_all('tr'))
+        non_routine_regex = 'Pkt \d{1,4}. porz. dzien.'
 
         for row in table_rows:
             time = row.td.next_sibling.get_text()
-            subject = row.td.next_sibling.next_sibling.a.get_text()
+            subject = row.td.next_sibling.next_sibling.get_text()
+            routine = not re.search(non_routine_regex, subject)
             voting_nr = row.a.get_text()
             link = row.a.attrs['href']
-            self.votes[time] = {'voting_nr': voting_nr, 'subject': subject, 'link': link}
+            self.votes[time] = {'voting_nr': voting_nr, 'subject': subject, 'routine': routine, 'link': link}
 
 
 class SingleVotingPage(ParliamentPage):
