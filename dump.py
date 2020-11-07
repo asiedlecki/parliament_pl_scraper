@@ -1,16 +1,20 @@
 import scraper as sc
 import math
 from datetime import datetime
+from typing import Union
 
 
-def batch_dump_parliament_votings(term=9, votings_threshold=math.inf):
+def batch_dump_parliament_votings(term:int=9, dates:list=[],
+                                  votings_threshold:Union[int, float]=math.inf):
     uri = 'agent.xsp?symbol=posglos&NrKadencji={t}'.format(t=term)
     records_list = []
     main_voting_page = sc.MainVotingPage(uri)
     main_voting_page.get_dict_of_days()
 
     for day, day_values in main_voting_page.days_dict.items():
-        if int(day_values['votings']) < votings_threshold:  # if added so as to process only days with a few votings
+        parse_by_date_bool = (normalize_date(day) in dates) | (len(dates) == 0)
+        parse_by_votings_threshold_bool = int(day_values['votings']) < votings_threshold
+        if parse_by_date_bool & parse_by_votings_threshold_bool:
             day_page = sc.DayVotingPage(uri=day_values['link'],
                                         date=day)
             day_page.get_dict_of_votes()
@@ -27,7 +31,7 @@ def batch_dump_parliament_votings(term=9, votings_threshold=math.inf):
                     club_page.get_vote_per_person()
 
                     for person, person_vote in club_page.person_vote.items():
-                        records_list.append({'date': normaliza_date(day), 'session': day_values['session'],
+                        records_list.append({'date': normalize_date(day), 'session': day_values['session'],
                                              'votings': day_values['votings'], 'time': voting,
                                              'subject': voting_values['subject'], 'routine': voting_values['routine'],
                                              'voting_nr': voting_values['voting_nr'], 'club': club[0],
@@ -36,7 +40,7 @@ def batch_dump_parliament_votings(term=9, votings_threshold=math.inf):
     return records_list
 
 
-def normaliza_date(date_str: str):
+def normalize_date(date_str: str):
     months_dict = {'stycznia': 1, 'lutego': 2, 'marca': 3,
                    'kwietnia': 4, 'maja': 5, 'czerwca': 6,
                    'lipca': 7, 'sierpnia': 8, 'września': 9,
@@ -47,4 +51,5 @@ def normaliza_date(date_str: str):
     _day = int(date_str_splitted[0])
     _month = months_dict[date_str_splitted[1]]
     _year = int(date_str_splitted[2][:4])
+
     return datetime(year=_year, month=_month, day=_day).strftime('%Y-%m-%d')
