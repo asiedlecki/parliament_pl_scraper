@@ -2,6 +2,8 @@ import scraper as sc
 import math
 from datetime import datetime
 from typing import Union
+from pymongo import MongoClient
+import json
 
 
 def batch_dump_parliament_votings(term:int=9, dates:list=[],
@@ -53,3 +55,20 @@ def normalize_date(date_str: str):
     _year = int(date_str_splitted[2][:4])
 
     return datetime(year=_year, month=_month, day=_day).strftime('%Y-%m-%d')
+
+
+class Configuration():
+    def __init__(self):
+        with open('configuration.json') as f:
+            self.config = json.load(f)
+
+
+class MyMongoClient(MongoClient):
+    def __init__(self, *args, **kwargs):
+        super(MyMongoClient, self).__init__(*args, **kwargs)
+
+    def set_votes_collection(self):
+        db_name = Configuration().config['mongodb']['parliament_votes']['database']
+        self.db = self[db_name]
+        coll_name = Configuration().config['mongodb']['parliament_votes']['collection']
+        self.coll = self.db[coll_name]
