@@ -1,4 +1,4 @@
-import scraper as sc
+from src import scraper as sc
 import math
 from datetime import datetime
 from typing import Union
@@ -59,7 +59,7 @@ def normalize_date(date_str: str):
 
 class Configuration():
     def __init__(self):
-        with open('configuration.json') as f:
+        with open('configuration_prod.json') as f:
             self.config = json.load(f)
 
 

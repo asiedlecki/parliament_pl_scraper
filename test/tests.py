@@ -2,6 +2,7 @@ import unittest
 from urllib.request import urlopen, http
 from bs4 import BeautifulSoup
 import re
+from src.dataproc import batch_dump_parliament_votings
 
 class TestMainVotingPage(unittest.TestCase):
     bs_main_voting_page = None
@@ -81,6 +82,15 @@ class TestClubVotesPage(unittest.TestCase):
 
         self.assertTrue(len(set(person_vote.keys())) >= 3, "Less than 3 persons within the club")
         self.assertEqual({'Wstrzymał się', 'Nieobecny', 'Przeciw', 'Za'}, set(person_vote.values()));
+
+
+class TestVotingsBatchDump(unittest.TestCase):
+    def setUpClass():
+        TestVotingsBatchDump.output = batch_dump_parliament_votings(term=9, votings_threshold=5)
+
+    def test_data_types(self):
+        self.assertIsInstance(TestVotingsBatchDump.output, list)
+        self.assertIsInstance(TestVotingsBatchDump.output[-1], dict)
 
 
 if __name__ == '__main__':

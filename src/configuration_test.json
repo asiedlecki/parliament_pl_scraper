@@ -1,0 +1,4 @@
+{"mongodb":  {"parliament_votes_test": {"database": "parliament_scraper_db",
+                                        "collection": "votes_coll"}
+             }
+}
