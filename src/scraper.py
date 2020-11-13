@@ -1,8 +1,12 @@
 from urllib.request import urlopen
-from bs4 import BeautifulSoup
 from urllib.error import HTTPError
 from urllib.error import URLError
 import re
+import json
+from datetime import datetime
+
+from bs4 import BeautifulSoup
+
 
 class ParliamentPage():
 
@@ -31,6 +35,8 @@ class ParliamentPage():
 class MainVotingPage(ParliamentPage):
 
     def get_dict_of_days(self):
+        with open('src/exclusions.json') as f:
+            self.days_excluded = list(json.load(f).keys())
         table_rows = (self.soup.find('div', {'id': 'view:_id1:_id2:facetMain:agentHTML'})
                       .tbody.find_all('tr'))
 
@@ -38,10 +44,27 @@ class MainVotingPage(ParliamentPage):
         for row in table_rows:
             if row.td.get_text().strip() != "":
                 session = row.td.get_text()
-            date = row.a.get_text()
+            date = self.normalize_date(row.a.get_text())
+            print(date, self.days_excluded)
+            if date in self.days_excluded: # skip if date is in exclusions list
+                continue
             votings = row.find('td', {'class': 'right'}).get_text()
             link = row.a.attrs['href']
             self.days_dict[date] = {'session': session, 'votings': votings, 'link': link}
+
+    def normalize_date(self, date_str: str):
+        months_dict = {'stycznia': 1, 'lutego': 2, 'marca': 3,
+                       'kwietnia': 4, 'maja': 5, 'czerwca': 6,
+                       'lipca': 7, 'sierpnia': 8, 'września': 9,
+                       'października': 10, 'listopada': 11, 'grudnia': 12
+                       }
+
+        date_str_splitted = date_str.split(sep=' ', maxsplit=2)
+        _day = int(date_str_splitted[0])
+        _month = months_dict[date_str_splitted[1]]
+        _year = int(date_str_splitted[2][:4])
+
+        return datetime(year=_year, month=_month, day=_day).strftime('%Y-%m-%d')
 
 
 class DayVotingPage(ParliamentPage):

@@ -1,12 +1,11 @@
 from src import scraper as sc
 import math
-from datetime import datetime
 from typing import Union
 from pymongo import MongoClient
 import json
 
 
-def batch_dump_parliament_votings(term:int=9, dates:list=[],
+def batch_dump_parliament_votings(term:int=9, dates:Union[list, set]=[],
                                   votings_threshold:Union[int, float]=math.inf):
     uri = 'agent.xsp?symbol=posglos&NrKadencji={t}'.format(t=term)
     records_list = []
@@ -14,7 +13,7 @@ def batch_dump_parliament_votings(term:int=9, dates:list=[],
     main_voting_page.get_dict_of_days()
 
     for day, day_values in main_voting_page.days_dict.items():
-        parse_by_date_bool = (normalize_date(day) in dates) | (len(dates) == 0)
+        parse_by_date_bool = (day in dates) | (len(dates) == 0)
         parse_by_votings_threshold_bool = int(day_values['votings']) < votings_threshold
         if parse_by_date_bool & parse_by_votings_threshold_bool:
             day_page = sc.DayVotingPage(uri=day_values['link'],
@@ -33,7 +32,7 @@ def batch_dump_parliament_votings(term:int=9, dates:list=[],
                     club_page.get_vote_per_person()
 
                     for person, person_vote in club_page.person_vote.items():
-                        records_list.append({'date': normalize_date(day), 'session': day_values['session'],
+                        records_list.append({'date': day, 'session': day_values['session'],
                                              'votings': day_values['votings'], 'time': voting,
                                              'subject': voting_values['subject'], 'routine': voting_values['routine'],
                                              'voting_nr': voting_values['voting_nr'], 'club': club[0],
@@ -42,24 +41,9 @@ def batch_dump_parliament_votings(term:int=9, dates:list=[],
     return records_list
 
 
-def normalize_date(date_str: str):
-    months_dict = {'stycznia': 1, 'lutego': 2, 'marca': 3,
-                   'kwietnia': 4, 'maja': 5, 'czerwca': 6,
-                   'lipca': 7, 'sierpnia': 8, 'września': 9,
-                   'października': 10, 'listopada': 11, 'grudnia': 12
-                   }
-
-    date_str_splitted = date_str.split(sep=' ', maxsplit=2)
-    _day = int(date_str_splitted[0])
-    _month = months_dict[date_str_splitted[1]]
-    _year = int(date_str_splitted[2][:4])
-
-    return datetime(year=_year, month=_month, day=_day).strftime('%Y-%m-%d')
-
-
 class Configuration():
     def __init__(self):
-        with open('configuration_prod.json') as f:
+        with open('src/configuration_prod.json') as f:
             self.config = json.load(f)
 
 
