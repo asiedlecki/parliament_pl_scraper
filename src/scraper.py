@@ -45,7 +45,6 @@ class MainVotingPage(ParliamentPage):
             if row.td.get_text().strip() != "":
                 session = row.td.get_text()
             date = self.normalize_date(row.a.get_text())
-            print(date, self.days_excluded)
             if date in self.days_excluded: # skip if date is in exclusions list
                 continue
             votings = row.find('td', {'class': 'right'}).get_text()
