@@ -28,4 +28,4 @@ class DailyPageChecker:
     def insert_missing_dates_to_db(self) -> NoReturn:
         client = dp.MyMongoClient()
         client.set_votes_collection()
-        return client.coll.insert_many(documents=self.scrapped_data, ordered=False)
+        return client.db.coll.insert_many(documents=self.scrapped_data, ordered=False)

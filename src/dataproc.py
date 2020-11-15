@@ -1,8 +1,11 @@
-from src import scraper as sc
 import math
 from typing import Union
-from pymongo import MongoClient
 import json
+from datetime import datetime
+
+from pymongo import MongoClient
+
+from src import scraper as sc
 
 
 def batch_dump_parliament_votings(term:int=9, dates:Union[list, set]=[],
@@ -36,7 +39,8 @@ def batch_dump_parliament_votings(term:int=9, dates:Union[list, set]=[],
                                              'votings': day_values['votings'], 'time': voting,
                                              'subject': voting_values['subject'], 'routine': voting_values['routine'],
                                              'voting_nr': voting_values['voting_nr'], 'club': club[0],
-                                             'person': person, 'vote': person_vote})
+                                             'person': person, 'vote': person_vote,
+                                             'inserted_dt': datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
 
     return records_list
 
