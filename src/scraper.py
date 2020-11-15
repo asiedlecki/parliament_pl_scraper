@@ -35,7 +35,7 @@ class ParliamentPage():
 class MainVotingPage(ParliamentPage):
 
     def get_dict_of_days(self):
-        with open('src/exclusions.json') as f:
+        with open('../configuration/exclusions.json') as f:
             self.days_excluded = list(json.load(f).keys())
         table_rows = (self.soup.find('div', {'id': 'view:_id1:_id2:facetMain:agentHTML'})
                       .tbody.find_all('tr'))

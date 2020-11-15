@@ -1,8 +1,12 @@
 import unittest
 from urllib.request import urlopen, http
-from bs4 import BeautifulSoup
+from datetime import datetime
 import re
+
+from bs4 import BeautifulSoup
+
 from src.dataproc import batch_dump_parliament_votings
+
 
 class TestMainVotingPage(unittest.TestCase):
     bs_main_voting_page = None
@@ -86,11 +90,31 @@ class TestClubVotesPage(unittest.TestCase):
 
 class TestVotingsBatchDump(unittest.TestCase):
     def setUpClass():
-        TestVotingsBatchDump.output = batch_dump_parliament_votings(term=9, votings_threshold=5)
+        TestVotingsBatchDump.output = batch_dump_parliament_votings(term=9, votings_threshold=2)
+        TestVotingsBatchDump.votes_values = set(dict_['vote'] for dict_ in TestVotingsBatchDump.output)
 
     def test_data_types(self):
         self.assertIsInstance(TestVotingsBatchDump.output, list)
         self.assertIsInstance(TestVotingsBatchDump.output[-1], dict)
+
+    def test_number_of_fields(self):
+        self.assertTrue(len(TestVotingsBatchDump.output[-1]) == 11)
+
+    def test_key_data(self):
+        self.assertEqual(TestVotingsBatchDump.votes_values, {'Za', 'Przeciw', 'Wstrzymał się', 'Nieobecny'}) # votes
+        self.assertTrue(min((len(value.split(' ')) for value
+                             in TestVotingsBatchDump.gather_field_values(self, field_name='person'))) == 2) # names
+        self.assertEqual({type(int(value)) for value
+                               in TestVotingsBatchDump.gather_field_values(self, field_name='session')}, {int})  # sessions
+        self.assertTrue(min({int(value) for value
+                             in TestVotingsBatchDump.gather_field_values(self, field_name='votings')}) >= 1)  # votings
+        self.assertTrue(min({len(value) for value
+                        in TestVotingsBatchDump.gather_field_values(self, field_name='club')}) == 2)  # club names min
+        self.assertIsInstance([datetime.strptime(dt, '%Y-%m-%d') for dt
+                               in TestVotingsBatchDump.gather_field_values(self, field_name='date')][0], datetime) # date
+
+    def gather_field_values(self, field_name):
+        return set(dict_[field_name] for dict_ in TestVotingsBatchDump.output)
 
 
 if __name__ == '__main__':
