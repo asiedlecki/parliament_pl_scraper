@@ -32,16 +32,24 @@ class TestMainVotingPage(unittest.TestCase):
         main_voting_page.get_dict_of_days()
         self.assertIsInstance(main_voting_page.days_dict, dict)
         # get latest date
-        chosen_date = sorted(list(main_voting_page.days_dict.keys()))[-1]
-        self.assertIsInstance(main_voting_page.days_dict[chosen_date], dict)
-        self.assertEqual(set(main_voting_page.days_dict[chosen_date].keys()), {'session', 'link', 'votings'})
+        latest_date = sorted(list(main_voting_page.days_dict.keys()))[-1]
+        self.assertIsInstance(main_voting_page.days_dict[latest_date], dict)
+        self.assertEqual(set(main_voting_page.days_dict[latest_date].keys()), {'session', 'link', 'votings'})
 
 
 class TestDayVotingPage(unittest.TestCase):
     bs_day_voting_page = None
     def setUpClass():
+        # for testing structure of website
         url = 'http://www.sejm.gov.pl/Sejm9.nsf/agent.xsp?symbol=listaglos&IdDnia=1802'
         TestDayVotingPage.bs_day_voting_page = BeautifulSoup(urlopen(url), 'html.parser')
+        # for testing scraper
+        TestDayVotingPage.main_voting_page = sc.MainVotingPage(uri='agent.xsp?symbol=posglos&NrKadencji=9')
+        TestDayVotingPage.main_voting_page.get_dict_of_days()
+        latest_date = sorted(list(TestDayVotingPage.main_voting_page.days_dict.keys()))[-1]
+        TestDayVotingPage.latest_data = TestDayVotingPage.main_voting_page.days_dict[latest_date]
+        TestDayVotingPage.day_voting_page = sc.DayVotingPage(uri=TestDayVotingPage.latest_data['link'], date=latest_date)
+        TestDayVotingPage.day_voting_page.get_dict_of_votes()
 
     def test_title_text(self):
         pageTitle = TestDayVotingPage.bs_day_voting_page.find('h1').get_text()
@@ -53,6 +61,13 @@ class TestDayVotingPage(unittest.TestCase):
                                 .tbody.find_all('tr'))
         self.assertIsNotNone(table_of_voting_days, "There is no table on main page")
         self.assertTrue(len(table_of_voting_days) > 0, "There is no data in the table")
+
+    def test_scrap_day_voting_page(self):
+        # self.votes[time] = {'voting_nr': voting_nr, 'subject': subject, 'routine': routine, 'link': link}
+        self.assertIsInstance(TestDayVotingPage.day_voting_page.votes, dict)
+        latest_time = sorted(list(TestDayVotingPage.day_voting_page.votes.keys()))[-1]
+        self.assertIsInstance(TestDayVotingPage.day_voting_page.votes[latest_time], dict)
+        self.assertEqual(set(TestDayVotingPage.day_voting_page.votes[latest_time].keys()), {'voting_nr', 'subject', 'routine', 'link'})
 
 
 class TestVotingPage(unittest.TestCase):
@@ -96,8 +111,7 @@ class TestClubVotesPage(unittest.TestCase):
                     pass
 
         self.assertTrue(len(set(person_vote.keys())) >= 3, "Less than 3 persons within the club")
-        self.assertEqual({'Wstrzymał się', 'Nieobecny', 'Przeciw', 'Za'}, set(person_vote.values()));
-
+        self.assertEqual({'Wstrzymał się', 'Nieobecny', 'Przeciw', 'Za'}, set(person_vote.values()))
 
 class TestVotingsBatchDump(unittest.TestCase):
     def setUpClass():
