@@ -28,7 +28,8 @@ class TestMainVotingPage(unittest.TestCase):
         self.assertTrue(len(table_of_voting_days) > 0, "There is no data in the table")
 
     def test_scrap_main_voting_page(self):
-        main_voting_page = sc.MainVotingPage(uri='agent.xsp?symbol=posglos&NrKadencji=9')
+        term = 9
+        main_voting_page = sc.MainVotingPage(term=term, suffix_uri='agent.xsp?symbol=posglos&NrKadencji={0}'.format(term))
         main_voting_page.get_dict_of_days()
         self.assertIsInstance(main_voting_page.days_dict, dict)
         # get latest date
@@ -40,16 +41,17 @@ class TestMainVotingPage(unittest.TestCase):
 class TestDayVotingPage(unittest.TestCase):
     bs_day_voting_page = None
     def setUpClass():
-        # for testing structure of website
-        url = 'http://www.sejm.gov.pl/Sejm9.nsf/agent.xsp?symbol=listaglos&IdDnia=1802'
-        TestDayVotingPage.bs_day_voting_page = BeautifulSoup(urlopen(url), 'html.parser')
+        term=9
+        main_url = 'http://www.sejm.gov.pl/Sejm9.nsf/'
         # for testing scraper
-        TestDayVotingPage.main_voting_page = sc.MainVotingPage(uri='agent.xsp?symbol=posglos&NrKadencji=9')
+        TestDayVotingPage.main_voting_page = sc.MainVotingPage(term=term, suffix_uri='agent.xsp?symbol=posglos&NrKadencji={0}'.format(term))
         TestDayVotingPage.main_voting_page.get_dict_of_days()
         latest_date = sorted(list(TestDayVotingPage.main_voting_page.days_dict.keys()))[-1]
         TestDayVotingPage.latest_data = TestDayVotingPage.main_voting_page.days_dict[latest_date]
-        TestDayVotingPage.day_voting_page = sc.DayVotingPage(uri=TestDayVotingPage.latest_data['link'], date=latest_date)
+        TestDayVotingPage.day_voting_page = sc.DayVotingPage(suffix_uri=TestDayVotingPage.latest_data['link'], date=latest_date)
         TestDayVotingPage.day_voting_page.get_dict_of_votes()
+        # for testing structure of website
+        TestDayVotingPage.bs_day_voting_page = BeautifulSoup(urlopen(main_url+TestDayVotingPage.latest_data['link']), 'html.parser')
 
     def test_title_text(self):
         pageTitle = TestDayVotingPage.bs_day_voting_page.find('h1').get_text()
@@ -73,8 +75,17 @@ class TestDayVotingPage(unittest.TestCase):
 class TestVotingPage(unittest.TestCase):
     bs_voting_page = None
     def setUpClass():
+        # for testing structure of website
         url = 'http://www.sejm.gov.pl/Sejm9.nsf/agent.xsp?symbol=glosowania&NrKadencji=9&NrPosiedzenia=17&NrGlosowania=1'
         TestVotingPage.bs_voting_page = BeautifulSoup(urlopen(url), 'html.parser')
+        # for testing scraper
+        TestDayVotingPage.main_voting_page = sc.MainVotingPage(uri='agent.xsp?symbol=posglos&NrKadencji=9')
+        TestDayVotingPage.main_voting_page.get_dict_of_days()
+        latest_date = sorted(list(TestDayVotingPage.main_voting_page.days_dict.keys()))[-1]
+        TestDayVotingPage.latest_data = TestDayVotingPage.main_voting_page.days_dict[latest_date]
+        TestDayVotingPage.day_voting_page = sc.DayVotingPage(uri=TestDayVotingPage.latest_data['link'],
+                                                             date=latest_date)
+        TestDayVotingPage.day_voting_page.get_dict_of_votes()
 
     def test_title_text(self):
         pageTitle = TestVotingPage.bs_voting_page.find('h1').get_text()

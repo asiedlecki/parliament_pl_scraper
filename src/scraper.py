@@ -10,15 +10,19 @@ from bs4 import BeautifulSoup
 
 class ParliamentPage():
 
-    def __init__(self, uri):
-        self.host = 'http://www.sejm.gov.pl/Sejm9.nsf'
-        self.uri = uri
+    def __init__(self, term=9, suffix_uri=''):
+        self.host = 'http://www.sejm.gov.pl'
+        self.term_uri = 'Sejm{0}.nsf'.format(term)
+        # self.main_uri = '/agent.xsp?symbol=posglos&NrKadencji={0}'.format(term)
+        self.suffix_uri = '' if suffix_uri == '' else '/'+suffix_uri
+        self.uri = self.term_uri + self.suffix_uri
         self.read_page()
         self.make_soup()
 
     def read_page(self):
         try:
             url = '{0}/{1}'.format(self.host, self.uri)
+            print(url)
             self.html = urlopen(url).read()
         except HTTPError as e:
             print(e)
