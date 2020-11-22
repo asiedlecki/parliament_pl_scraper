@@ -2,10 +2,12 @@ import unittest
 from urllib.request import urlopen, http
 from datetime import datetime
 import re
+import random
 
 from bs4 import BeautifulSoup
 
 from src.dataproc import batch_dump_parliament_votings
+import src.scraper as sc
 
 
 class TestMainVotingPage(unittest.TestCase):
@@ -14,16 +16,25 @@ class TestMainVotingPage(unittest.TestCase):
         url = 'http://www.sejm.gov.pl/Sejm9.nsf/agent.xsp?symbol=posglos&NrKadencji=9'
         TestMainVotingPage.bs_main_voting_page = BeautifulSoup(urlopen(url), 'html.parser')
 
-    def test_title_text(self):
+    def test_web_title_text(self):
         pageTitle = TestMainVotingPage.bs_main_voting_page.find('h1').get_text()
         self.assertEqual('Głosowania na posiedzeniach Sejmu', pageTitle);
 
-    def test_list_of_voting_days(self):
+    def test_web_list_of_voting_days(self):
         table_of_voting_days = (TestMainVotingPage.bs_main_voting_page
                                 .find('div', {'id': 'view:_id1:_id2:facetMain:agentHTML'})
                                 .tbody.find_all('tr'))
         self.assertIsNotNone(table_of_voting_days, "There is no table on main page")
         self.assertTrue(len(table_of_voting_days) > 0, "There is no data in the table")
+
+    def test_scrap_main_voting_page(self):
+        main_voting_page = sc.MainVotingPage(uri='agent.xsp?symbol=posglos&NrKadencji=9')
+        main_voting_page.get_dict_of_days()
+        self.assertIsInstance(main_voting_page.days_dict, dict)
+        # get latest date
+        chosen_date = sorted(list(main_voting_page.days_dict.keys()))[-1]
+        self.assertIsInstance(main_voting_page.days_dict[chosen_date], dict)
+        self.assertEqual(set(main_voting_page.days_dict[chosen_date].keys()), {'session', 'link', 'votings'})
 
 
 class TestDayVotingPage(unittest.TestCase):
