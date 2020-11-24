@@ -48,7 +48,7 @@ class TestDayVotingPage(unittest.TestCase):
         TestDayVotingPage.main_voting_page.get_dict_of_days()
         latest_date = sorted(list(TestDayVotingPage.main_voting_page.days_dict.keys()))[-1]
         TestDayVotingPage.latest_data = TestDayVotingPage.main_voting_page.days_dict[latest_date]
-        TestDayVotingPage.day_voting_page = sc.DayVotingPage(suffix_uri=TestDayVotingPage.latest_data['link'], date=latest_date)
+        TestDayVotingPage.day_voting_page = sc.DayVotingPage(term=term, suffix_uri=TestDayVotingPage.latest_data['link'], date=latest_date)
         TestDayVotingPage.day_voting_page.get_dict_of_votes()
         # for testing structure of website
         TestDayVotingPage.bs_day_voting_page = BeautifulSoup(urlopen(main_url+TestDayVotingPage.latest_data['link']), 'html.parser')
@@ -76,14 +76,16 @@ class TestVotingPage(unittest.TestCase):
     bs_voting_page = None
     def setUpClass():
         # for testing structure of website
+        term = 9
         url = 'http://www.sejm.gov.pl/Sejm9.nsf/agent.xsp?symbol=glosowania&NrKadencji=9&NrPosiedzenia=17&NrGlosowania=1'
         TestVotingPage.bs_voting_page = BeautifulSoup(urlopen(url), 'html.parser')
         # for testing scraper
-        TestDayVotingPage.main_voting_page = sc.MainVotingPage(uri='agent.xsp?symbol=posglos&NrKadencji=9')
+        TestDayVotingPage.main_voting_page = sc.MainVotingPage(term=term, suffix_uri='agent.xsp?symbol=posglos&NrKadencji=9')
         TestDayVotingPage.main_voting_page.get_dict_of_days()
         latest_date = sorted(list(TestDayVotingPage.main_voting_page.days_dict.keys()))[-1]
         TestDayVotingPage.latest_data = TestDayVotingPage.main_voting_page.days_dict[latest_date]
-        TestDayVotingPage.day_voting_page = sc.DayVotingPage(uri=TestDayVotingPage.latest_data['link'],
+        TestDayVotingPage.day_voting_page = sc.DayVotingPage(term=term,
+                                                             suffix_uri=TestDayVotingPage.latest_data['link'],
                                                              date=latest_date)
         TestDayVotingPage.day_voting_page.get_dict_of_votes()
 

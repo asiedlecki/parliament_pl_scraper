@@ -12,26 +12,29 @@ def batch_dump_parliament_votings(term:int=9, dates:Union[list, set]=[],
                                   votings_threshold:Union[int, float]=math.inf):
     uri = 'agent.xsp?symbol=posglos&NrKadencji={t}'.format(t=term)
     records_list = []
-    main_voting_page = sc.MainVotingPage(uri)
+    main_voting_page = sc.MainVotingPage(term=term, suffix_uri=uri)
     main_voting_page.get_dict_of_days()
 
     for day, day_values in main_voting_page.days_dict.items():
         parse_by_date_bool = (day in dates) | (len(dates) == 0)
         parse_by_votings_threshold_bool = int(day_values['votings']) < votings_threshold
+
         if parse_by_date_bool & parse_by_votings_threshold_bool:
-            day_page = sc.DayVotingPage(uri=day_values['link'],
+            day_page = sc.DayVotingPage(term=term, suffix_uri=day_values['link'],
                                         date=day)
             day_page.get_dict_of_votes()
 
             for voting, voting_values in day_page.votes.items():
-                voting_page = sc.SingleVotingPage(uri=voting_values['link'],
+                voting_page = sc.SingleVotingPage(term=term,
+                                                  suffix_uri=voting_values['link'],
                                                   subject=voting_values['subject'],
                                                   voting_nr=voting_values['voting_nr']
                                                   )
 
                 for club in voting_page.clubs_list:
-                    club_page = sc.SingleClubVotesPage(uri=club[1],
-                                                    club=club[0])
+                    club_page = sc.SingleClubVotesPage(term=term,
+                                                       suffix_uri=club[1],
+                                                       club=club[0])
                     club_page.get_vote_per_person()
 
                     for person, person_vote in club_page.person_vote.items():

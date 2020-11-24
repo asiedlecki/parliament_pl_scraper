@@ -22,7 +22,7 @@ class ParliamentPage():
     def read_page(self):
         try:
             url = '{0}/{1}'.format(self.host, self.uri)
-            print(url)
+            # print(url)
             self.html = urlopen(url).read()
         except HTTPError as e:
             print(e)
