@@ -9,7 +9,7 @@ from src import scraper as sc
 
 
 def batch_dump_parliament_votings(term:int=9, dates:Union[list, set]=[],
-                                  votings_threshold:Union[int, float]=math.inf):
+                                  votings_threshold:Union[int, float]=math.inf) -> list:
     uri = 'agent.xsp?symbol=posglos&NrKadencji={t}'.format(t=term)
     records_list = []
     main_voting_page = sc.MainVotingPage(term=term, suffix_uri=uri)
@@ -50,7 +50,7 @@ def batch_dump_parliament_votings(term:int=9, dates:Union[list, set]=[],
 
 class Configuration():
     def __init__(self):
-        with open('src/configuration_prod.json') as f:
+        with open('configuration/configuration_prod.json') as f:
             self.config = json.load(f)
 
 

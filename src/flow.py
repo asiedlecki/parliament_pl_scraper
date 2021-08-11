@@ -23,9 +23,9 @@ class DailyPageChecker:
         )
 
     def scrap_missing_dates(self) -> NoReturn:
-        self.scrapped_data = dp.batch_dump_parliament_votings(term=self.term, dates=self.missing_days)
+        self.scraped_data = dp.batch_dump_parliament_votings(term=self.term, dates=self.missing_days)
 
     def insert_missing_dates_to_db(self) -> NoReturn:
         client = dp.MyMongoClient()
         client.set_votes_collection()
-        return client.db.coll.insert_many(documents=self.scrapped_data, ordered=False)
+        return client.db.coll.insert_many(documents=self.scraped_data, ordered=False)
