@@ -1,3 +1,4 @@
+import copy
 import math
 from typing import Union
 import json
@@ -22,6 +23,8 @@ def batch_dump_parliament_votings(term:int=9, dates:Union[list, set]=[],
 
     if len(dates) > 0:
         dates_to_scrape = {key:value for key, value in main_voting_page.days_dict.items() if key in dates}
+    else:
+        dates_to_scrape = copy.deepcopy(main_voting_page.days_dict)
     if dates_to_ignore:
         for day in dates_to_ignore:
             dates_to_scrape.pop(day, None)
