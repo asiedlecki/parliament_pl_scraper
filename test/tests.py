@@ -128,7 +128,7 @@ class TestClubVotesPage(unittest.TestCase):
 
 class TestVotingsBatchDump(unittest.TestCase):
     def setUpClass():
-        TestVotingsBatchDump.output = batch_dump_parliament_votings(term=9, votings_threshold=2)
+        TestVotingsBatchDump.output = batch_dump_parliament_votings(term=9, dates=['2019-11-12'])
         TestVotingsBatchDump.votes_values = set(dict_['vote'] for dict_ in TestVotingsBatchDump.output)
 
     def test_data_types(self):
