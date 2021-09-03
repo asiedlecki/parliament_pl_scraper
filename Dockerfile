@@ -1,8 +1,13 @@
 # syntax=docker/dockerfile:1
-FROM python:3.8
+# FROM python:3.8
+ARG BASE_CONTAINER=jupyter/minimal-notebook
+FROM $BASE_CONTAINER
+
+LABEL author="Artur Siedlecki"
+
 RUN pip install pipenv
-EXPOSE 8501
-# COPY ./requirements.txt /requirements.txt
-WORKDIR /
+
 COPY . /
-RUN pipenv install --system --deploy
+
+RUN pip install requests urllib3 beautifulsoup4
+RUN pip install selenium pymongo
