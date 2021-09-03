@@ -1,1 +1,2 @@
-{"2020-03-26": "PDF instead of html table."}
+{"2020-03-26": "PDF instead of html table.",
+ "2020-02-14": "Investigation required: AttributeError: 'SingleClubVotesPage' object has no attribute 'soup'"}
