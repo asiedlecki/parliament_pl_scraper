@@ -18,6 +18,10 @@ Parliament PL scraper is a Python app for scraping results of votings of Polish 
     $ pipenv install
     $ pipenv shell
     ```
+- run docker containers with MongoDB and Mongo Express in terminal.
+  ```bash
+  $ docker-compose up
+  ```
 
 ## 2. Run Jupyter notebook within environment
 
@@ -26,7 +30,9 @@ $ pipenv run jupyter notebook
 ```
 
 ## 3. Run scraper
-#### In Jupyter Notebook:
+#### Open ready-to-use notebook:
+- exec.ipynb
+#### Or create your own notebook with the code below.
 ```python
 # tell Python about that additional module import path
 import os
@@ -51,11 +57,6 @@ scraped_data = dp.batch_dump_parliament_votings(term=9)
 ```
 
 ## 4. Insert scraped data into MongoDB
-#### Run docker containers with MongoDB and Mongo Express in terminal.
-```bash
-$ docker-compose up
-```
-
 #### Initiate MongoDB client in Jupyter Notebook and insert data.
 ```python
 # set up Mongo client
