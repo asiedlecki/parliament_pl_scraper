@@ -1,13 +1,21 @@
 # syntax=docker/dockerfile:1
-# FROM python:3.8
-ARG BASE_CONTAINER=jupyter/minimal-notebook
-FROM $BASE_CONTAINER
+FROM mongo:5
 
-LABEL author="Artur Siedlecki"
+RUN apt-get update -y
+RUN apt-get install -y apt-transport-https
+RUN apt-get install -y python3-pip
 
-RUN pip install pipenv
+WORKDIR /app
+COPY requirements.txt requirements.txt
+RUN pip3 install -r requirements.txt
+COPY . .
 
-COPY . /
+RUN #mkdir -p /data/mongodb
 
-RUN pip install requests urllib3 beautifulsoup4
-RUN pip install selenium pymongo
+# Add Tini. Tini operates as a process subreaper for jupyter. This prevents kernel crashes.
+ENV TINI_VERSION v0.6.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
+RUN chmod +x /usr/bin/tini
+ENTRYPOINT ["/usr/bin/tini", "--"]
+
+CMD ["jupyter", "notebook", "--port=8888", "--no-browser", "--ip=0.0.0.0", "--allow-root"]
