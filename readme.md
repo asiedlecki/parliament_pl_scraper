@@ -7,11 +7,21 @@ Parliament PL scraper is a Python app for scraping results of votings of Polish 
 ## 1. Set up environment
 
 - clone repository
-- in main directory execute following to install all dependencies
-```bash
-$ pipenv install
-$ pipenv shell
-```
+    ```bash
+    $ git clone https://github.com/asiedlecki/parliament_pl_scraper.git
+    ```
+    ```bash
+    $ cd parliament_pl_scraper
+    ```
+- execute following to install all dependencies
+    ```bash
+    $ pipenv install
+    $ pipenv shell
+    ```
+- run docker containers with MongoDB and Mongo Express in terminal.
+  ```bash
+  $ docker-compose up
+  ```
 
 ## 2. Run Jupyter notebook within environment
 
@@ -20,7 +30,9 @@ $ pipenv run jupyter notebook
 ```
 
 ## 3. Run scraper
-
+#### Open ready-to-use notebook:
+- exec.ipynb
+#### Or create your own notebook with the code below.
 ```python
 # tell Python about that additional module import path
 import os
@@ -45,23 +57,14 @@ scraped_data = dp.batch_dump_parliament_votings(term=9)
 ```
 
 ## 4. Insert scraped data into MongoDB
-This tutorial assumes that a MongoDB instance is running on the default host and port.
-- If you need to download and install MongoDB, follow tutorial:
-https://docs.mongodb.com/manual/installation/
-- Assuming you have downloaded and installed MongoDB, you can start it in terminal like so:
-
-```bash
-# linux
-$ sudo systemctl start mongod
-```
-
+#### Initiate MongoDB client in Jupyter Notebook and insert data.
 ```python
 # set up Mongo client
 client = dp.MyMongoClient()
 client.set_votes_collection()
 client.db.coll.insert_many(documents=scraped_data, ordered=False)
 ```
-#### Check what has been inserted
+#### Check what has been inserted.
 ```python
 # number of records (documents)
 client.db.coll.estimated_document_count()
@@ -71,7 +74,7 @@ client.db.coll.find({}, {'date': 1}).distinct('date')
 ```
 # Running unit tests
 
-```python
-pipenv shell
-python -m test.tests
+```bash
+$ pipenv shell
+$ python -m test.tests
 ```
