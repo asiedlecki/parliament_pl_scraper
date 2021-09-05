@@ -20,7 +20,7 @@ Parliament PL scraper is a Python app for scraping results of votings of Polish 
     ```
 - run docker containers with MongoDB and Mongo Express in terminal.
   ```bash
-  $ docker-compose up
+  $ docker-compose -f scraper_prod.yaml up -d
   ```
 
 ## 2. Run Jupyter notebook within environment
@@ -72,6 +72,16 @@ client.db.coll.estimated_document_count()
 # what days are inserted
 client.db.coll.find({}, {'date': 1}).distinct('date')
 ```
+
+## 5. Close environment
+- close docker containers
+  ```bash
+  $ docker-compose -f scraper_prod.yaml down 
+  ```
+- exit pipenv environment
+  ```bash
+  $ exit
+  ```
 # Running unit tests
 
 ```bash

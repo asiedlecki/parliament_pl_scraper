@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  mongo:
+    image: 'mongo:5'
+    ports:
+      - 27017:27017
+    volumes:
+      - type: volume
+        source: mongo-storage-prod
+        target: /data/db
+## for restoring dump execute in container
+## to restore from a dump directory to a local mongod instance running on port 27017
+## $ mongorestore  dump/
+      - type: bind
+        source: /home/oem/dump
+        target: /dump
+
+  mongo_express:
+    image: mongo-express
+    ports:
+      - 8080:8081
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongo
+
+volumes:
+  mongo-storage-prod:
+    driver: local
